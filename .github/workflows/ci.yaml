@@ -6,6 +6,7 @@ on:
       - main
   schedule:
     - cron: '0 9,12,18 * * *'
+  workflow_dispatch: # allow manual trigger from Actions tab
 
 jobs:
   build:
@@ -23,5 +24,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-          run: ./gradlew build
+      - name: Build (without tests)
+        run: ./gradlew assemble
+
+      - name: Run tests
+        run: ./gradlew test --info --stacktrace
+
+      - name: Upload test report
+        if: always() # upload even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
